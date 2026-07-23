@@ -1,4 +1,6 @@
-"""Demo: every chart in comms_vis, rendered to a single gallery PNG."""
+"""Demo: every chart in simple_eda, rendered to a single gallery PNG."""
+
+import os
 
 import matplotlib
 matplotlib.use("Agg")
@@ -6,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import comms_vis as cv
+import simple_eda as cv
 
 cv.set_theme()
 rng = np.random.default_rng(7)
@@ -45,5 +47,6 @@ cv.line(trend["signups"], title="Single series (no legend)", ax=axes[1, 2])
 
 fig.set_facecolor("#fcfcfb")
 fig.tight_layout(pad=2.0)
-fig.savefig("gallery.png", dpi=120, bbox_inches="tight")
-print("wrote gallery.png")
+out = os.path.join(os.path.dirname(__file__), "gallery.png")
+fig.savefig(out, dpi=120, bbox_inches="tight")
+print(f"wrote {out}")

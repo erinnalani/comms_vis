@@ -1,4 +1,4 @@
-"""comms_vis — a tiny, modern matplotlib + pandas charting library.
+"""simple_eda.core — a tiny, modern matplotlib + pandas charting library.
 
 Design goals: clean marks, recessive chrome, a colorblind-safe categorical
 palette, and a legend whenever more than one series is drawn. Every function

@@ -1,42 +1,57 @@
-# comms_vis
+# simple-eda
 
 A tiny, modern charting library built on **matplotlib** and **pandas** — nothing
-else. One file, under 200 lines. It gives you clean, colorblind-safe charts
-straight from a DataFrame without the usual matplotlib boilerplate.
+else. The core is a single ~157-line module with a colorblind-safe palette and
+clean, chartjunk-free defaults. It gives you five chart helpers straight from a
+DataFrame without the usual matplotlib boilerplate.
 
-![gallery](gallery.png)
+![gallery](examples/gallery.png)
 
 ## Why
 
-Default matplotlib looks dated and takes a dozen lines to tidy up. `comms_vis`
+Default matplotlib looks dated and takes a dozen lines to tidy up. `simple_eda`
 applies a modern theme (no chartjunk, hairline gridlines, a validated
-categorical palette) and gives you five chart functions that each take a pandas
+categorical palette) and gives you chart functions that each take a pandas
 object and return the `Axes` for further tweaking.
+
+## Layout
+
+```
+simple-eda-project/
+├── src/
+│   └── simple_eda/
+│       ├── __init__.py      # public API
+│       └── core.py          # the chart functions + theme
+├── examples/
+│   ├── example.py           # renders the gallery above
+│   └── gallery.png
+├── README.md
+├── pyproject.toml
+└── LICENSE
+```
 
 ## Install
 
-Just needs matplotlib and pandas:
-
 ```bash
-pip install matplotlib pandas
+pip install -e .          # from the project root
 ```
 
-Then drop `comms_vis.py` next to your code.
+This pulls in matplotlib and pandas.
 
 ## Usage
 
 ```python
 import pandas as pd
-import comms_vis as cv
+import simple_eda as se
 
-cv.set_theme()   # call once to apply the modern look
+se.set_theme()   # call once to apply the modern look
 
 df = pd.DataFrame(
     {"signups": [120, 145, 138, 172], "active": [90, 110, 121, 140]},
     index=["Jan", "Feb", "Mar", "Apr"],
 )
 
-ax = cv.line(df, title="Growth over time")
+ax = se.line(df, title="Growth over time")
 ax.figure.savefig("growth.png")
 ```
 
@@ -64,5 +79,5 @@ in order.
 Run the full gallery shown above:
 
 ```bash
-python example.py   # writes gallery.png
+python examples/example.py   # writes examples/gallery.png
 ```
