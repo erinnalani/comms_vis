@@ -38,15 +38,18 @@ counts = (penguins.groupby(["island", "species"]).size()
 fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 
 cv.ridgeline(penguins, value="body_mass_g", group="species",
-             title="Body mass distribution by species", ax=axes[0, 0])
+             title="Body mass distribution by species",
+             xlabel="body mass (g)", ax=axes[0, 0])
 cv.lollipop(flipper, title="Mean flipper length by species",
             xlabel="flipper length (mm)", ax=axes[0, 1])
 cv.dumbbell(mass_by_sex, title="Body mass: female vs male",
             xlabel="body mass (g)", ax=axes[0, 2])
-cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
-           title="Bill length vs bill depth", ax=axes[1, 0])
+sc = cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
+                title="Bill length vs bill depth", ax=axes[1, 0])
+sc.set_xlabel("bill length (mm)")
+sc.set_ylabel("bill depth (mm)")
 cv.hist(penguins, "bill_length_mm", by="species", title="Bill length by species",
-        ax=axes[1, 1])
+        xlabel="bill length (mm)", ax=axes[1, 1])
 cv.bar(counts, title="Penguins per island", ax=axes[1, 2])
 
 fig.set_facecolor("#fcfcfb")
