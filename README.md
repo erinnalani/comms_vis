@@ -1,9 +1,10 @@
 # simple-eda
 
 A tiny, modern charting library built on **matplotlib** and **pandas** — nothing
-else. The core is a single ~157-line module with a colorblind-safe palette and
-clean, chartjunk-free defaults. It gives you five chart helpers straight from a
-DataFrame without the usual matplotlib boilerplate.
+else. The core is a single ~280-line module with a colorblind-safe palette and
+clean, chartjunk-free defaults. It gives you eight chart helpers straight from a
+DataFrame without the usual matplotlib boilerplate — including three you'd
+normally have to hand-build: **lollipop**, **dumbbell**, and **ridgeline**.
 
 ![gallery](examples/gallery.png)
 
@@ -68,15 +69,31 @@ subplot. A legend is added automatically only when there is more than one series
 | `barh(data, ...)` | Ranked horizontal bars | DataFrame / Series |
 | `scatter(data, x, y, color=None, ...)` | Scatter, optionally split by a category | DataFrame |
 | `hist(data, column=None, bins=20, ...)` | Distribution of one numeric column | DataFrame / Series |
+| `lollipop(data, sort=True, ...)` | Ranked lollipop — a lighter `barh` | DataFrame / Series |
+| `dumbbell(data, sort=True, ...)` | Two dots + connector per row (A vs B) | 2-column DataFrame |
+| `ridgeline(data, value, group, overlap=1.3, ...)` | Overlapping distribution per group | DataFrame |
 
 Common keyword args: `title`, `xlabel`, `ylabel`, `ax`.
+
+### The signature three
+
+- **`lollipop`** — ranked categories with far less ink than bars; sorted descending
+  by default. Takes a Series or one-column DataFrame.
+- **`dumbbell`** — a before/after or A-vs-B comparison. Pass a DataFrame with
+  exactly two numeric columns; each becomes one dot colour and a legend entry.
+- **`ridgeline`** — the shape of a numeric variable across categories, as smoothed
+  (Gaussian-KDE) curves stacked and gently overlapped, ordered by median. Pass the
+  `value` and `group` column names.
 
 `PALETTE` is the exported list of eight colorblind-safe hues, assigned to series
 in order.
 
 ## Example
 
-Run the full gallery shown above:
+The gallery above is built entirely from the **Palmer Penguins** dataset
+(`examples/penguins.csv`) — ridgeline of body mass by species, a mean-flipper
+lollipop, a female-vs-male dumbbell, plus scatter, histogram and grouped bars.
+Run it end to end:
 
 ```bash
 python examples/example.py   # writes examples/gallery.png

@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import numpy as np  # ships with pandas; no new dependency
 import pandas as pd
 
-__all__ = ["set_theme", "PALETTE", "line", "bar", "barh", "scatter", "hist"]
+__all__ = ["set_theme", "PALETTE", "line", "bar", "barh", "scatter", "hist",
+           "lollipop", "dumbbell", "ridgeline"]
 
 # Validated, colorblind-safe categorical palette (assigned in fixed order).
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
@@ -155,3 +157,123 @@ def hist(data, column=None, bins=20, title=None, xlabel=None, ax=None):
     ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
     return _finish(ax, title, xlabel or (column or values.name), "count",
                    legend=False)
+
+
+def _one_column(data):
+    """Return a (labels, values) pair from a Series or one-column DataFrame."""
+    if isinstance(data, pd.DataFrame):
+        if data.shape[1] != 1:
+            raise ValueError("expected a Series or a one-column DataFrame")
+        s = data.iloc[:, 0]
+    else:
+        s = data
+    return s.index, s
+
+
+def lollipop(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
+    """Ranked lollipop chart — a lighter, cleaner alternative to ``barh``.
+
+    A thin stem runs from the baseline to a dot at each category's value.
+    Accepts a Series or a one-column DataFrame; values are sorted descending
+    by default so the ranking reads top-to-bottom.
+    """
+    _, s = _one_column(data)
+    if sort:
+        s = s.sort_values(ascending=True)   # ascending → largest on top after invert
+    else:
+        s = s[::-1]
+    ax = _new_ax(ax)
+    ax.grid(axis="y", visible=False)
+    ax.grid(axis="x", visible=True)
+    y = range(len(s))
+    ax.hlines(list(y), 0, s.values, color=_BASELINE, linewidth=2.0, zorder=1)
+    ax.scatter(s.values, list(y), s=90, color=PALETTE[0], zorder=2,
+               edgecolor=_SURFACE, linewidth=1.2)
+    ax.set_yticks(list(y))
+    ax.set_yticklabels([str(v) for v in s.index])
+    ax.margins(x=0.08)
+    return _finish(ax, title, xlabel, ylabel, legend=False)
+
+
+def dumbbell(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
+    """Dumbbell chart — two dots per category joined by a connector.
+
+    Ideal for a before/after or A-vs-B comparison across categories (e.g.
+    male vs female). ``data`` must be a DataFrame with exactly two numeric
+    columns; each column becomes one dot colour, labelled in the legend.
+    Rows are sorted by the first column by default.
+    """
+    df = _as_frame(data)
+    if df.shape[1] != 2:
+        raise ValueError("dumbbell expects a DataFrame with exactly two columns")
+    if sort:
+        df = df.sort_values(df.columns[0], ascending=True)
+    else:
+        df = df[::-1]
+    a, b = df.columns[0], df.columns[1]
+    ax = _new_ax(ax)
+    ax.grid(axis="y", visible=False)
+    ax.grid(axis="x", visible=True)
+    y = list(range(len(df)))
+    ax.hlines(y, df[a].values, df[b].values, color=_BASELINE, linewidth=2.5,
+              zorder=1)
+    ax.scatter(df[a].values, y, s=90, color=PALETTE[0], label=str(a), zorder=2,
+               edgecolor=_SURFACE, linewidth=1.2)
+    ax.scatter(df[b].values, y, s=90, color=PALETTE[1], label=str(b), zorder=2,
+               edgecolor=_SURFACE, linewidth=1.2)
+    ax.set_yticks(y)
+    ax.set_yticklabels([str(v) for v in df.index])
+    ax.margins(x=0.08)
+    return _finish(ax, title, xlabel, ylabel, legend=True)
+
+
+def _kde(x, grid):
+    """Gaussian KDE on ``grid`` using Silverman's rule for bandwidth."""
+    x = np.asarray(x, dtype=float)
+    x = x[~np.isnan(x)]
+    n = x.size
+    if n < 2:
+        return np.zeros_like(grid)
+    std = x.std(ddof=1)
+    iqr = np.subtract(*np.percentile(x, [75, 25]))
+    spread = min(std, iqr / 1.349) if iqr > 0 else std
+    bw = 0.9 * spread * n ** (-0.2) or 1.0
+    u = (grid[:, None] - x[None, :]) / bw
+    return np.exp(-0.5 * u ** 2).sum(axis=1) / (n * bw * np.sqrt(2 * np.pi))
+
+
+def ridgeline(data, value, group, title=None, xlabel=None, overlap=1.3,
+              ax=None):
+    """Ridgeline plot — one smoothed distribution per group, gently overlapped.
+
+    Great for comparing the *shape* of a numeric variable across categories.
+    ``value`` is the numeric column and ``group`` the categorical column.
+    Groups are ordered by their median so the ridges climb; ``overlap`` sets
+    how far adjacent ridges intrude on each other (1.0 = just touching).
+    """
+    vals = data[value].astype(float)
+    order = (data.groupby(group)[value].median().sort_values().index.tolist())
+    lo, hi = np.nanmin(vals), np.nanmax(vals)
+    pad = 0.05 * (hi - lo)
+    grid = np.linspace(lo - pad, hi + pad, 512)
+
+    densities = {g: _kde(data.loc[data[group] == g, value].values, grid)
+                 for g in order}
+    peak = max((d.max() for d in densities.values()), default=1.0) or 1.0
+    scale = overlap / peak
+
+    ax = _new_ax(ax, figsize=(8, 0.9 * len(order) + 2))
+    ax.grid(visible=False)
+    ax.set_yticks(range(len(order)))
+    ax.set_yticklabels([str(g) for g in order])
+    # Draw back-to-front so lower ridges overlap those behind them.
+    for i in reversed(range(len(order))):
+        g = order[i]
+        curve = i + densities[g] * scale
+        color = PALETTE[i % len(PALETTE)]
+        ax.fill_between(grid, i, curve, color=color, alpha=0.75, zorder=i,
+                        linewidth=0)
+        ax.plot(grid, curve, color=_SURFACE, linewidth=1.4, zorder=i)
+    ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
+    ax.margins(x=0)
+    return _finish(ax, title, xlabel or value, None, legend=False)
