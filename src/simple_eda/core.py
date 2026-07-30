@@ -356,7 +356,9 @@ def ridgeline(data, value, group, center="median", band=None, title=None,
         cval = _center_value(v, center)
         if cval is not None:
             top = i + np.interp(cval, grid, densities[g]) * scale
-            ax.vlines(cval, i, top, color=_INK, alpha=0.5, linewidth=1.4,
+            # One consistent accent (wine) for every centre marker — it flags a
+            # statistic, not a category, and contrasts with all the ridge fills.
+            ax.vlines(cval, i, top, color=PALETTE[7], alpha=0.95, linewidth=1.8,
                       zorder=i + 0.5)
     ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
     ax.margins(x=0)
