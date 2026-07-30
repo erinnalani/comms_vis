@@ -71,7 +71,7 @@ subplot. A legend is added automatically only when there is more than one series
 | `hist(data, column=None, by=None, bins=20, ...)` | Distribution of a column; `by=` overlays one translucent histogram per group | DataFrame / Series |
 | `lollipop(data, sort=True, ...)` | Ranked lollipop — a lighter `barh` | DataFrame / Series |
 | `dumbbell(data, sort=True, ...)` | Two dots + connector per row (A vs B) | 2-column DataFrame |
-| `ridgeline(data, value, group, median=True, overlap=1.3, ...)` | Overlapping distribution per group, with a median marker per ridge | DataFrame |
+| `ridgeline(data, value, group, center="median", band=None, overlap=1.3, ...)` | Overlapping distribution per group; `center` marks the mean/median, `band` shades ±1 SD or the IQR | DataFrame |
 
 Common keyword args: `title`, `xlabel`, `ylabel`, `ax`.
 

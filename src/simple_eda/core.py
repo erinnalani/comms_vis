@@ -283,17 +283,46 @@ def _kde(x, grid):
     return np.exp(-0.5 * u ** 2).sum(axis=1) / (n * bw * np.sqrt(2 * np.pi))
 
 
-def ridgeline(data, value, group, median=True, title=None, xlabel=None,
-              overlap=1.3, ax=None):
+def _center_value(v, center):
+    """Return the requested centre statistic for a value array."""
+    if center == "mean":
+        return np.nanmean(v)
+    if center == "median":
+        return np.nanmedian(v)
+    return None
+
+
+def _band_bounds(v, band):
+    """Return the (low, high) x-bounds of a spread band, or None."""
+    if band == "sd":
+        m, s = np.nanmean(v), np.nanstd(v)
+        return m - s, m + s
+    if band == "iqr":
+        return tuple(np.nanpercentile(v, [25, 75]))
+    return None
+
+
+def ridgeline(data, value, group, center="median", band=None, title=None,
+              xlabel=None, overlap=1.3, ax=None):
     """Ridgeline plot — one smoothed distribution per group, gently overlapped.
 
     Great for comparing the *shape* of a numeric variable across categories.
     ``value`` is the numeric column and ``group`` the categorical column.
     Groups are ordered by their median so the ridges climb; ``overlap`` sets
-    how far adjacent ridges intrude on each other (1.0 = just touching). With
-    ``median=True`` a thin marker is drawn at each group's median so their
-    centres line up for easy comparison.
+    how far adjacent ridges intrude on each other (1.0 = just touching).
+
+    ``center`` draws a thin marker at each group's ``"median"`` (default),
+    ``"mean"``, or ``None`` for no marker. ``band`` shades the central spread
+    of each ridge: ``"sd"`` for mean ±1 standard deviation, ``"iqr"`` for the
+    interquartile range, or ``None`` (default) for no band. Pair ``"sd"`` with
+    ``center="mean"`` and ``"iqr"`` with ``center="median"`` so the marker and
+    the shaded band describe the same centre.
     """
+    if center not in (None, "mean", "median"):
+        raise ValueError("center must be None, 'mean' or 'median'")
+    if band not in (None, "sd", "iqr"):
+        raise ValueError("band must be None, 'sd' or 'iqr'")
+
     vals = data[value].astype(float)
     order = (data.groupby(group)[value].median().sort_values().index.tolist())
     lo, hi = np.nanmin(vals), np.nanmax(vals)
@@ -304,6 +333,7 @@ def ridgeline(data, value, group, median=True, title=None, xlabel=None,
                  for g in order}
     peak = max((d.max() for d in densities.values()), default=1.0) or 1.0
     scale = overlap / peak
+    base_alpha = 0.55 if band else 0.75
 
     ax = _new_ax(ax, figsize=(8, 0.9 * len(order) + 2))
     ax.grid(visible=False)
@@ -312,15 +342,21 @@ def ridgeline(data, value, group, median=True, title=None, xlabel=None,
     # Draw back-to-front so lower ridges overlap those behind them.
     for i in reversed(range(len(order))):
         g = order[i]
+        v = data.loc[data[group] == g, value].values
         curve = i + densities[g] * scale
         color = PALETTE[i % len(PALETTE)]
-        ax.fill_between(grid, i, curve, color=color, alpha=0.75, zorder=i,
+        ax.fill_between(grid, i, curve, color=color, alpha=base_alpha, zorder=i,
                         linewidth=0)
-        ax.plot(grid, curve, color=_SURFACE, linewidth=1.4, zorder=i)
-        if median:
-            med = np.nanmedian(data.loc[data[group] == g, value].values)
-            top = i + np.interp(med, grid, densities[g]) * scale
-            ax.vlines(med, i, top, color=_INK, alpha=0.45, linewidth=1.4,
+        bounds = _band_bounds(v, band)
+        if bounds is not None:
+            mask = (grid >= bounds[0]) & (grid <= bounds[1])
+            ax.fill_between(grid[mask], i, curve[mask], color=color, alpha=0.9,
+                            zorder=i + 0.2, linewidth=0)
+        ax.plot(grid, curve, color=_SURFACE, linewidth=1.4, zorder=i + 0.3)
+        cval = _center_value(v, center)
+        if cval is not None:
+            top = i + np.interp(cval, grid, densities[g]) * scale
+            ax.vlines(cval, i, top, color=_INK, alpha=0.5, linewidth=1.4,
                       zorder=i + 0.5)
     ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
     ax.margins(x=0)

@@ -38,6 +38,7 @@ counts = (penguins.groupby(["island", "species"]).size()
 fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 
 cv.ridgeline(penguins, value="body_mass_g", group="species",
+             center="mean", band="sd",
              title="Body mass distribution by species",
              xlabel="body mass (g)", ax=axes[0, 0])
 cv.lollipop(species_counts, title="Number of penguins by species",
