@@ -21,8 +21,8 @@ penguins = pd.read_csv(os.path.join(HERE, "penguins.csv"))
 
 # --- shape a few tidy tables straight from the raw frame -------------------
 
-# mean flipper length per species → ranked lollipop
-flipper = penguins.groupby("species")["flipper_length_mm"].mean()
+# number of penguins per species → ranked lollipop
+species_counts = penguins.groupby("species").size()
 
 # mean body mass by sex per species → dumbbell (female vs male)
 sexed = penguins.dropna(subset=["sex"])
@@ -40,16 +40,17 @@ fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 cv.ridgeline(penguins, value="body_mass_g", group="species",
              title="Body mass distribution by species",
              xlabel="body mass (g)", ax=axes[0, 0])
-cv.lollipop(flipper, title="Mean flipper length by species",
-            xlabel="flipper length (mm)", ax=axes[0, 1])
+cv.lollipop(species_counts, title="Number of penguins by species",
+            xlabel="count", ax=axes[0, 1])
 cv.dumbbell(mass_by_sex, title="Body mass: female vs male",
             xlabel="body mass (g)", ax=axes[0, 2])
 sc = cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
                 trend=True, title="Bill length vs bill depth", ax=axes[1, 0])
 sc.set_xlabel("bill length (mm)")
 sc.set_ylabel("bill depth (mm)")
-cv.hist(penguins, "bill_length_mm", by="species", title="Bill length by species",
-        xlabel="bill length (mm)", ax=axes[1, 1])
+cv.hist(penguins, "flipper_length_mm", by="species",
+        title="Flipper length by species",
+        xlabel="flipper length (mm)", ax=axes[1, 1])
 cv.bar(counts, title="Penguins per island", ax=axes[1, 2])
 
 fig.set_facecolor("#fcfcfb")
