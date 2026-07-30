@@ -43,8 +43,8 @@ cv.lollipop(flipper, title="Mean flipper length by species",
             xlabel="flipper length (mm)", ax=axes[0, 1])
 cv.dumbbell(mass_by_sex, title="Body mass: female vs male",
             xlabel="body mass (g)", ax=axes[0, 2])
-cv.scatter(penguins, "bill_length_mm", "flipper_length_mm", color="species",
-           title="Bill length vs flipper length", ax=axes[1, 0])
+cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
+           title="Bill length vs bill depth", ax=axes[1, 0])
 cv.hist(penguins, "bill_length_mm", by="species", title="Bill length by species",
         ax=axes[1, 1])
 cv.bar(counts, title="Penguins per island", ax=axes[1, 2])
