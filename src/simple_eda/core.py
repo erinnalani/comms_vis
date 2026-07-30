@@ -148,10 +148,25 @@ def scatter(data, x, y, color=None, title=None, ax=None):
     return _finish(ax, title, x, y, legend=bool(color))
 
 
-def hist(data, column=None, bins=20, title=None, xlabel=None, ax=None):
-    """Histogram of a single numeric column (or a Series)."""
-    values = data if isinstance(data, pd.Series) else data[column]
+def hist(data, column=None, by=None, bins=20, title=None, xlabel=None, ax=None):
+    """Histogram of a single numeric column (or a Series).
+
+    Pass ``by`` (a categorical column name) to split the distribution into one
+    translucent, overlaid histogram per group — sharing a single set of bin
+    edges — so the overlap between groups is visible. Requires a DataFrame and
+    a ``column`` when ``by`` is given.
+    """
     ax = _new_ax(ax)
+    if by is not None:
+        edges = np.histogram_bin_edges(data[column].dropna(), bins=bins)
+        for i, (key, grp) in enumerate(data.groupby(by)):
+            ax.hist(grp[column].dropna(), bins=edges, label=str(key),
+                    color=PALETTE[i % len(PALETTE)], alpha=0.6,
+                    edgecolor=_SURFACE, linewidth=0.6)
+        ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+        return _finish(ax, title, xlabel or column, "count", legend=True)
+
+    values = data if isinstance(data, pd.Series) else data[column]
     ax.hist(values.dropna(), bins=bins, color=PALETTE[0],
             edgecolor=_SURFACE, linewidth=0.8)
     ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
