@@ -1,8 +1,8 @@
 # simple-eda
 
 A tiny, modern charting library built on **matplotlib** and **pandas** — nothing
-else. The core is a single ~280-line module with a colorblind-safe palette and
-clean, chartjunk-free defaults. It gives you eight chart helpers straight from a
+else. The core is a single compact module with a colorblind-safe palette and
+clean, chartjunk-free defaults. It gives you five chart helpers straight from a
 DataFrame without the usual matplotlib boilerplate — including three you'd
 normally have to hand-build: **lollipop**, **dumbbell**, and **ridgeline**.
 
@@ -47,13 +47,10 @@ import simple_eda as se
 
 se.set_theme()   # call once to apply the modern look
 
-df = pd.DataFrame(
-    {"signups": [120, 145, 138, 172], "active": [90, 110, 121, 140]},
-    index=["Jan", "Feb", "Mar", "Apr"],
-)
+counts = pd.Series([152, 124, 68], index=["Adelie", "Gentoo", "Chinstrap"])
 
-ax = se.line(df, title="Growth over time")
-ax.figure.savefig("growth.png")
+ax = se.lollipop(counts, title="Penguins by species")
+ax.figure.savefig("counts.png")
 ```
 
 ## Functions
@@ -64,12 +61,9 @@ subplot. A legend is added automatically only when there is more than one series
 | Function | Purpose | Input |
 |----------|---------|-------|
 | `set_theme()` | Apply the modern default style globally | — |
-| `line(data, ...)` | Line chart; one line per column | DataFrame / Series |
-| `bar(data, ...)` | Grouped vertical bars | DataFrame / Series |
-| `barh(data, ...)` | Ranked horizontal bars | DataFrame / Series |
 | `scatter(data, x, y, color=None, trend=False, ...)` | Scatter, optionally split by a category; `trend=True` adds a per-group line of best fit | DataFrame |
 | `hist(data, column=None, by=None, bins=20, ...)` | Distribution of a column; `by=` overlays one translucent histogram per group | DataFrame / Series |
-| `lollipop(data, sort=True, ...)` | Ranked lollipop — a lighter `barh` | DataFrame / Series |
+| `lollipop(data, sort=True, ...)` | Ranked lollipop for categories | DataFrame / Series |
 | `dumbbell(data, sort=True, ...)` | Two dots + connector per row (A vs B) | 2-column DataFrame |
 | `ridgeline(data, value, group, center="median", band=None, overlap=1.3, ...)` | Overlapping distribution per group; `center` marks the mean/median, `band` shades ±1 SD or the IQR | DataFrame |
 
@@ -92,9 +86,9 @@ Tol's colorblind-safe *muted* hues as fallbacks for higher series counts.
 ## Example
 
 The gallery above is built entirely from the **Palmer Penguins** dataset
-(`examples/penguins.csv`) — ridgeline of body mass by species, a mean-flipper
-lollipop, a female-vs-male dumbbell, plus scatter, histogram and grouped bars.
-Run it end to end:
+(`examples/penguins.csv`) — a body-mass ridgeline, a species-count lollipop, a
+female-vs-male dumbbell, a bill-length-vs-depth scatter, and a flipper-length
+histogram. Run it end to end:
 
 ```bash
 python examples/example.py   # writes examples/gallery.png

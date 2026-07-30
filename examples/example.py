@@ -1,7 +1,7 @@
 """Demo: simple_eda on the Palmer Penguins dataset, rendered to one gallery PNG.
 
 Shows off the three signature charts (ridgeline, lollipop, dumbbell) alongside
-the everyday ones (scatter, hist, bar), all driven straight from a DataFrame.
+scatter and hist, all driven straight from a DataFrame.
 Data: examples/penguins.csv (Palmer Penguins; Horst, Hill & Gorman, 2020).
 """
 
@@ -28,32 +28,40 @@ species_counts = penguins.groupby("species").size()
 sexed = penguins.dropna(subset=["sex"])
 mass_by_sex = (sexed.groupby(["species", "sex"])["body_mass_g"]
                .mean().unstack())[["FEMALE", "MALE"]]
+mass_by_sex.columns = ["Female", "Male"]   # tidy legend labels
 
-# species counts per island → grouped bars
-counts = (penguins.groupby(["island", "species"]).size()
-          .unstack(fill_value=0))
+# --- draw the gallery (3 charts on top, 2 centred below) -------------------
 
-# --- draw the gallery ------------------------------------------------------
-
-fig, axes = plt.subplots(2, 3, figsize=(16, 9))
+fig = plt.figure(figsize=(16, 9))
+gs = fig.add_gridspec(2, 6)
+ax_ridge = fig.add_subplot(gs[0, 0:2])
+ax_lolli = fig.add_subplot(gs[0, 2:4])
+ax_dumb = fig.add_subplot(gs[0, 4:6])
+ax_scat = fig.add_subplot(gs[1, 1:3])
+ax_hist = fig.add_subplot(gs[1, 3:5])
 
 cv.ridgeline(penguins, value="body_mass_g", group="species",
              center="mean", band="sd",
              title="Body mass distribution by species",
-             xlabel="body mass (g)", ax=axes[0, 0])
+             xlabel="body mass (g)", ax=ax_ridge)
 cv.lollipop(species_counts, title="Number of penguins by species",
-            xlabel="count", ax=axes[0, 1])
+            xlabel="count", ax=ax_lolli)
 cv.dumbbell(mass_by_sex, title="Body mass: female vs male",
-            xlabel="body mass (g)", ax=axes[0, 2])
+            xlabel="body mass (g)", ax=ax_dumb)
 sc = cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
                 trend=True, alpha=0.45, title="Bill length vs bill depth",
-                ax=axes[1, 0])
+                ax=ax_scat)
 sc.set_xlabel("bill length (mm)")
 sc.set_ylabel("bill depth (mm)")
 cv.hist(penguins, "flipper_length_mm", by="species",
         title="Flipper length by species",
-        xlabel="flipper length (mm)", ax=axes[1, 1])
-cv.bar(counts, title="Penguins per island", ax=axes[1, 2])
+        xlabel="flipper length (mm)", ax=ax_hist)
+
+for a in (ax_ridge, ax_lolli, ax_dumb, ax_scat, ax_hist):
+    a.grid(False)                    # strip every gridline
+for a in (ax_lolli, ax_dumb):        # faint x-grid back on the magnitude charts
+    a.set_axisbelow(True)
+    a.grid(axis="x", visible=True, color="#e7e6e0", linewidth=0.8)
 
 fig.set_facecolor("#fcfcfb")
 fig.tight_layout(pad=2.0)

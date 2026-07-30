@@ -5,15 +5,12 @@ Import the whole toolkit and start plotting straight from a pandas object:
     import simple_eda as se
 
     se.set_theme()
-    se.line(df, title="Growth over time")
+    se.scatter(df, "x", "y", color="group", title="X vs Y")
 """
 
 from .core import (
     PALETTE,
     set_theme,
-    line,
-    bar,
-    barh,
     scatter,
     hist,
     lollipop,
@@ -26,9 +23,6 @@ __version__ = "0.2.0"
 __all__ = [
     "PALETTE",
     "set_theme",
-    "line",
-    "bar",
-    "barh",
     "scatter",
     "hist",
     "lollipop",

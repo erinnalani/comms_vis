@@ -13,7 +13,7 @@ import matplotlib.ticker as mticker
 import numpy as np  # ships with pandas; no new dependency
 import pandas as pd
 
-__all__ = ["set_theme", "PALETTE", "line", "bar", "barh", "scatter", "hist",
+__all__ = ["set_theme", "PALETTE", "scatter", "hist",
            "lollipop", "dumbbell", "ridgeline"]
 
 # Categorical palette (assigned in fixed order). The first three — tan, light
@@ -94,49 +94,6 @@ def _as_frame(data):
     return data
 
 
-def line(data, title=None, xlabel=None, ylabel=None, ax=None):
-    """Line chart. Each column of ``data`` becomes one series."""
-    df = _as_frame(data)
-    ax = _new_ax(ax)
-    for col in df.columns:
-        ax.plot(df.index, df[col], linewidth=2.0, label=str(col),
-                solid_capstyle="round", solid_joinstyle="round")
-    return _finish(ax, title, xlabel, ylabel, legend=df.shape[1] > 1)
-
-
-def bar(data, title=None, xlabel=None, ylabel=None, ax=None):
-    """Vertical bar chart. Multiple columns are drawn grouped side by side."""
-    df = _as_frame(data)
-    ax = _new_ax(ax)
-    n, x = df.shape[1], range(len(df.index))
-    width = 0.8 / n
-    for i, col in enumerate(df.columns):
-        offset = (i - (n - 1) / 2) * width
-        ax.bar([p + offset for p in x], df[col], width=width * 0.92,
-               label=str(col), color=PALETTE[i % len(PALETTE)])
-    ax.set_xticks(list(x))
-    ax.set_xticklabels([str(v) for v in df.index])
-    return _finish(ax, title, xlabel, ylabel, legend=n > 1)
-
-
-def barh(data, title=None, xlabel=None, ylabel=None, ax=None):
-    """Horizontal bar chart — best for ranked categories with long labels."""
-    df = _as_frame(data)
-    ax = _new_ax(ax)
-    ax.grid(axis="y", visible=False)
-    ax.grid(axis="x", visible=True)
-    n, y = df.shape[1], range(len(df.index))
-    height = 0.8 / n
-    for i, col in enumerate(df.columns):
-        offset = (i - (n - 1) / 2) * height
-        ax.barh([p + offset for p in y], df[col], height=height * 0.92,
-                label=str(col), color=PALETTE[i % len(PALETTE)])
-    ax.set_yticks(list(y))
-    ax.set_yticklabels([str(v) for v in df.index])
-    ax.invert_yaxis()
-    return _finish(ax, title, xlabel, ylabel, legend=n > 1)
-
-
 def _trend_line(ax, xv, yv, color):
     """Draw a straight OLS best-fit line for ``xv`` vs ``yv`` onto ``ax``."""
     pair = pd.DataFrame({"x": xv, "y": yv}).dropna()
@@ -212,7 +169,7 @@ def _one_column(data):
 
 
 def lollipop(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
-    """Ranked lollipop chart — a lighter, cleaner alternative to ``barh``.
+    """Ranked lollipop chart — a light, clean take on ranked categories.
 
     A thin stem runs from the baseline to a dot at each category's value.
     Accepts a Series or a one-column DataFrame; values are sorted descending
@@ -356,9 +313,9 @@ def ridgeline(data, value, group, center="median", band=None, title=None,
         cval = _center_value(v, center)
         if cval is not None:
             top = i + np.interp(cval, grid, densities[g]) * scale
-            # One consistent accent (wine) for every centre marker — it flags a
-            # statistic, not a category, and contrasts with all the ridge fills.
-            ax.vlines(cval, i, top, color=PALETTE[7], alpha=0.95, linewidth=1.8,
+            # One consistent accent (indigo) for every centre marker — it flags
+            # a statistic, not a category, and contrasts with all ridge fills.
+            ax.vlines(cval, i, top, color=PALETTE[4], alpha=0.95, linewidth=1.8,
                       zorder=i + 0.5)
     ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
     ax.margins(x=0)
