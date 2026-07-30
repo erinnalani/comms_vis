@@ -45,7 +45,7 @@ cv.lollipop(flipper, title="Mean flipper length by species",
 cv.dumbbell(mass_by_sex, title="Body mass: female vs male",
             xlabel="body mass (g)", ax=axes[0, 2])
 sc = cv.scatter(penguins, "bill_length_mm", "bill_depth_mm", color="species",
-                title="Bill length vs bill depth", ax=axes[1, 0])
+                trend=True, title="Bill length vs bill depth", ax=axes[1, 0])
 sc.set_xlabel("bill length (mm)")
 sc.set_ylabel("bill depth (mm)")
 cv.hist(penguins, "bill_length_mm", by="species", title="Bill length by species",

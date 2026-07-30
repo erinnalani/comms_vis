@@ -67,7 +67,7 @@ subplot. A legend is added automatically only when there is more than one series
 | `line(data, ...)` | Line chart; one line per column | DataFrame / Series |
 | `bar(data, ...)` | Grouped vertical bars | DataFrame / Series |
 | `barh(data, ...)` | Ranked horizontal bars | DataFrame / Series |
-| `scatter(data, x, y, color=None, ...)` | Scatter, optionally split by a category | DataFrame |
+| `scatter(data, x, y, color=None, trend=False, ...)` | Scatter, optionally split by a category; `trend=True` adds a per-group line of best fit | DataFrame |
 | `hist(data, column=None, by=None, bins=20, ...)` | Distribution of a column; `by=` overlays one translucent histogram per group | DataFrame / Series |
 | `lollipop(data, sort=True, ...)` | Ranked lollipop — a lighter `barh` | DataFrame / Series |
 | `dumbbell(data, sort=True, ...)` | Two dots + connector per row (A vs B) | 2-column DataFrame |

@@ -137,17 +137,38 @@ def barh(data, title=None, xlabel=None, ylabel=None, ax=None):
     return _finish(ax, title, xlabel, ylabel, legend=n > 1)
 
 
-def scatter(data, x, y, color=None, title=None, ax=None):
-    """Scatter plot of columns ``x`` vs ``y``, optionally split by ``color``."""
+def _trend_line(ax, xv, yv, color):
+    """Draw a straight OLS best-fit line for ``xv`` vs ``yv`` onto ``ax``."""
+    pair = pd.DataFrame({"x": xv, "y": yv}).dropna()
+    if len(pair) < 2:
+        return
+    slope, intercept = np.polyfit(pair["x"], pair["y"], 1)
+    xs = np.array([pair["x"].min(), pair["x"].max()])
+    ax.plot(xs, slope * xs + intercept, color=color, linewidth=2.2,
+            solid_capstyle="round", zorder=3)
+
+
+def scatter(data, x, y, color=None, trend=False, title=None, ax=None):
+    """Scatter plot of columns ``x`` vs ``y``, optionally split by ``color``.
+
+    Set ``trend=True`` to overlay a straight (OLS) line of best fit. When the
+    points are split by ``color``, one line is drawn per group in the group's
+    colour — which is the honest choice for grouped data, since a single line
+    across all groups can point the opposite way to every group within it.
+    """
     ax = _new_ax(ax)
     if color:
         for i, (key, grp) in enumerate(data.groupby(color)):
+            c = PALETTE[i % len(PALETTE)]
             ax.scatter(grp[x], grp[y], s=42, label=str(key), alpha=0.85,
-                       edgecolor=_SURFACE, linewidth=0.8,
-                       color=PALETTE[i % len(PALETTE)])
+                       edgecolor=_SURFACE, linewidth=0.8, color=c)
+            if trend:
+                _trend_line(ax, grp[x], grp[y], c)
     else:
         ax.scatter(data[x], data[y], s=42, alpha=0.85,
                    edgecolor=_SURFACE, linewidth=0.8, color=PALETTE[0])
+        if trend:
+            _trend_line(ax, data[x], data[y], PALETTE[0])
     return _finish(ax, title, x, y, legend=bool(color))
 
 
