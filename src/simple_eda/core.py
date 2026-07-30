@@ -283,14 +283,16 @@ def _kde(x, grid):
     return np.exp(-0.5 * u ** 2).sum(axis=1) / (n * bw * np.sqrt(2 * np.pi))
 
 
-def ridgeline(data, value, group, title=None, xlabel=None, overlap=1.3,
-              ax=None):
+def ridgeline(data, value, group, median=True, title=None, xlabel=None,
+              overlap=1.3, ax=None):
     """Ridgeline plot — one smoothed distribution per group, gently overlapped.
 
     Great for comparing the *shape* of a numeric variable across categories.
     ``value`` is the numeric column and ``group`` the categorical column.
     Groups are ordered by their median so the ridges climb; ``overlap`` sets
-    how far adjacent ridges intrude on each other (1.0 = just touching).
+    how far adjacent ridges intrude on each other (1.0 = just touching). With
+    ``median=True`` a thin marker is drawn at each group's median so their
+    centres line up for easy comparison.
     """
     vals = data[value].astype(float)
     order = (data.groupby(group)[value].median().sort_values().index.tolist())
@@ -315,6 +317,11 @@ def ridgeline(data, value, group, title=None, xlabel=None, overlap=1.3,
         ax.fill_between(grid, i, curve, color=color, alpha=0.75, zorder=i,
                         linewidth=0)
         ax.plot(grid, curve, color=_SURFACE, linewidth=1.4, zorder=i)
+        if median:
+            med = np.nanmedian(data.loc[data[group] == g, value].values)
+            top = i + np.interp(med, grid, densities[g]) * scale
+            ax.vlines(med, i, top, color=_INK, alpha=0.45, linewidth=1.4,
+                      zorder=i + 0.5)
     ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
     ax.margins(x=0)
     return _finish(ax, title, xlabel or value, None, legend=False)
