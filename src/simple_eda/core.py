@@ -16,10 +16,12 @@ import pandas as pd
 __all__ = ["set_theme", "PALETTE", "line", "bar", "barh", "scatter", "hist",
            "lollipop", "dumbbell", "ridgeline"]
 
-# Paul Tol's "muted" qualitative scheme — a colorblind-safe palette assigned
-# in fixed order. (SRON/Paul Tol, "Colour Schemes"; #DDDDDD is his bad-data grey.)
-PALETTE = ["#CC6677", "#332288", "#DDCC77", "#117733", "#88CCEE",
-           "#882255", "#44AA99", "#999933", "#AA4499"]
+# Categorical palette (assigned in fixed order). The first three — tan, light
+# blue, teal — carry most charts; the rest are Paul Tol's "muted" hues as
+# colorblind-safe fallbacks for higher series counts.
+PALETTE = ["#C9A66B", "#88CCEE", "#44AA99",           # tan, light blue, teal
+           "#CC6677", "#332288", "#DDCC77", "#117733",  # rose, indigo, sand, green
+           "#882255", "#999933", "#AA4499"]             # wine, olive, purple
 
 _INK = "#0b0b0b"          # primary text
 _MUTED = "#898781"        # axis labels / ticks
