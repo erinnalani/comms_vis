@@ -16,9 +16,10 @@ import pandas as pd
 __all__ = ["set_theme", "PALETTE", "line", "bar", "barh", "scatter", "hist",
            "lollipop", "dumbbell", "ridgeline"]
 
-# Validated, colorblind-safe categorical palette (assigned in fixed order).
-PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
-           "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+# Paul Tol's "muted" qualitative scheme — a colorblind-safe palette assigned
+# in fixed order. (SRON/Paul Tol, "Colour Schemes"; #DDDDDD is his bad-data grey.)
+PALETTE = ["#CC6677", "#332288", "#DDCC77", "#117733", "#88CCEE",
+           "#882255", "#44AA99", "#999933", "#AA4499"]
 
 _INK = "#0b0b0b"          # primary text
 _MUTED = "#898781"        # axis labels / ticks

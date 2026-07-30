@@ -85,8 +85,8 @@ Common keyword args: `title`, `xlabel`, `ylabel`, `ax`.
   (Gaussian-KDE) curves stacked and gently overlapped, ordered by median. Pass the
   `value` and `group` column names.
 
-`PALETTE` is the exported list of eight colorblind-safe hues, assigned to series
-in order.
+`PALETTE` is the exported list of nine colorblind-safe hues — Paul Tol's *muted*
+qualitative scheme — assigned to series in fixed order.
 
 ## Example
 
