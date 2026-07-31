@@ -1,12 +1,12 @@
 # simple-eda
 
+![gallery](examples/gallery.png)
+
 A tiny, modern charting library built on **matplotlib** and **pandas** — nothing
 else. The core is a single compact module with a colorblind-safe palette and
 clean, chartjunk-free defaults. It gives you five chart helpers straight from a
 DataFrame without the usual matplotlib boilerplate — including three you'd
 normally have to hand-build: **lollipop**, **dumbbell**, and **ridgeline**.
-
-![gallery](examples/gallery.png)
 
 ## Why
 
