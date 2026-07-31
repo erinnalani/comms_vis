@@ -27,7 +27,7 @@ cv.set_theme()
 
 SPCOL = {"Adelie": cv.PALETTE[0], "Chinstrap": cv.PALETTE[1], "Gentoo": cv.PALETTE[2]}
 FEM, MAL = "#999933", "#0077BB"        # coastal sex colours (olive / blue)
-INK, SURFACE = "#0b0b0b", "#fcfcfb"
+INK, SURFACE, NAVY = "#0b0b0b", "#fcfcfb", "#004488"
 
 penguins = pd.read_csv(os.path.join(HERE, "penguins.csv"))
 species_counts = penguins.groupby("species").size()
@@ -101,6 +101,10 @@ cv.hist(penguins, "flipper_length_mm", by="species",
         title="Flipper length by species", xlabel="flipper length (mm)", ax=axH)
 if axH.get_legend():
     axH.get_legend().remove()
+for sp, (lx, ly) in {"Adelie": (183, 31), "Chinstrap": (203, 15),
+                     "Gentoo": (220, 23)}.items():      # direct labels; stands alone
+    axH.text(lx, ly, sp, color=SPCOL[sp], fontsize=12, fontweight="bold",
+             ha="center", path_effects=[pe.withStroke(linewidth=3.5, foreground=SURFACE)])
 
 for a in (axR, axL, axD, axS, axH):
     a.grid(False)
@@ -108,14 +112,15 @@ for a in (axL, axD):                       # faint x-grid aids value reading
     a.set_axisbelow(True)
     a.grid(axis="x", visible=True, color="#e7e6e0", linewidth=0.8)
 
-# penguin trio (bottom-right), doubling as the species key, centred in its cell
+# penguin trio (bottom-right), framed by a "Palmer / Penguins" title and
+# doubling as the species key, centred in its cell
 axP.axis("off")
 axP.imshow(strip, extent=[0, strip_w, 0, strip_h], aspect="equal",
            interpolation="antialiased")
 cell = gs[1, 2].get_position(fig)
 cell_aspect = (cell.width * 16) / (cell.height * 9)
-pad_x, y_lo, y_hi = 60, -120, strip_h
-box_w, box_h = strip_w + 2 * pad_x, strip_h - y_lo
+pad_x, y_lo, y_hi = 60, -300, strip_h + 220        # room for the title above & below
+box_w, box_h = strip_w + 2 * pad_x, y_hi - y_lo
 if box_w / box_h >= cell_aspect:           # fit, then centre — never overflow
     x_range, y_range = box_w, box_w / cell_aspect
 else:
@@ -124,8 +129,12 @@ mid_x, mid_y = strip_w / 2, (y_lo + y_hi) / 2
 axP.set_xlim(mid_x - x_range / 2, mid_x + x_range / 2)
 axP.set_ylim(mid_y - y_range / 2, mid_y + y_range / 2)
 axP.set_aspect("equal", adjustable="box")
+axP.text(mid_x, strip_h + 110, "Palmer", ha="center", va="bottom",
+         fontsize=31, fontweight="medium", color=NAVY)
+axP.text(mid_x, -205, "Penguins", ha="center", va="top",
+         fontsize=31, fontweight="medium", color=NAVY)
 for name, ctr in zip(ORDER, centres):
-    axP.text(ctr, -30, name.capitalize(), ha="center", va="top", fontsize=12.5,
+    axP.text(ctr, -28, name.capitalize(), ha="center", va="top", fontsize=11.5,
              fontweight="bold", color=SPCOL[name.capitalize()])
 
 fig.set_facecolor("#fcfcfb")
