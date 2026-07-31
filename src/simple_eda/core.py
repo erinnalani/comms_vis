@@ -168,24 +168,30 @@ def _one_column(data):
     return s.index, s
 
 
-def lollipop(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
+def lollipop(data, colors=None, title=None, xlabel=None, ylabel=None,
+             sort=True, ax=None):
     """Ranked lollipop chart — a light, clean take on ranked categories.
 
     A thin stem runs from the baseline to a dot at each category's value.
     Accepts a Series or a one-column DataFrame; values are sorted descending
-    by default so the ranking reads top-to-bottom.
+    by default so the ranking reads top-to-bottom. ``colors`` may be a single
+    colour or a ``{label: colour}`` dict to colour each dot by its category.
     """
     _, s = _one_column(data)
     if sort:
         s = s.sort_values(ascending=True)   # ascending → largest on top after invert
     else:
         s = s[::-1]
+    if isinstance(colors, dict):
+        dot = [colors.get(idx, PALETTE[0]) for idx in s.index]
+    else:
+        dot = colors or PALETTE[0]
     ax = _new_ax(ax)
     ax.grid(axis="y", visible=False)
     ax.grid(axis="x", visible=True)
     y = range(len(s))
     ax.hlines(list(y), 0, s.values, color=_BASELINE, linewidth=2.0, zorder=1)
-    ax.scatter(s.values, list(y), s=90, color=PALETTE[0], zorder=2,
+    ax.scatter(s.values, list(y), s=90, color=dot, zorder=2,
                edgecolor=_SURFACE, linewidth=1.2)
     ax.set_yticks(list(y))
     ax.set_yticklabels([str(v) for v in s.index])
@@ -193,13 +199,15 @@ def lollipop(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
     return _finish(ax, title, xlabel, ylabel, legend=False)
 
 
-def dumbbell(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
+def dumbbell(data, colors=None, title=None, xlabel=None, ylabel=None,
+             sort=True, ax=None):
     """Dumbbell chart — two dots per category joined by a connector.
 
     Ideal for a before/after or A-vs-B comparison across categories (e.g.
     male vs female). ``data`` must be a DataFrame with exactly two numeric
     columns; each column becomes one dot colour, labelled in the legend.
-    Rows are sorted by the first column by default.
+    Rows are sorted by the first column by default. ``colors`` is an optional
+    ``(first, second)`` pair overriding the two default dot colours.
     """
     df = _as_frame(data)
     if df.shape[1] != 2:
@@ -208,6 +216,7 @@ def dumbbell(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
         df = df.sort_values(df.columns[0], ascending=True)
     else:
         df = df[::-1]
+    c0, c1 = colors if colors else (PALETTE[0], PALETTE[1])
     a, b = df.columns[0], df.columns[1]
     ax = _new_ax(ax)
     ax.grid(axis="y", visible=False)
@@ -215,9 +224,9 @@ def dumbbell(data, title=None, xlabel=None, ylabel=None, sort=True, ax=None):
     y = list(range(len(df)))
     ax.hlines(y, df[a].values, df[b].values, color=_BASELINE, linewidth=2.5,
               zorder=1)
-    ax.scatter(df[a].values, y, s=90, color=PALETTE[0], label=str(a), zorder=2,
+    ax.scatter(df[a].values, y, s=90, color=c0, label=str(a), zorder=2,
                edgecolor=_SURFACE, linewidth=1.2)
-    ax.scatter(df[b].values, y, s=90, color=PALETTE[1], label=str(b), zorder=2,
+    ax.scatter(df[b].values, y, s=90, color=c1, label=str(b), zorder=2,
                edgecolor=_SURFACE, linewidth=1.2)
     ax.set_yticks(y)
     ax.set_yticklabels([str(v) for v in df.index])
@@ -313,9 +322,9 @@ def ridgeline(data, value, group, center="median", band=None, title=None,
         cval = _center_value(v, center)
         if cval is not None:
             top = i + np.interp(cval, grid, densities[g]) * scale
-            # One consistent accent (indigo) for every centre marker — it flags
+            # One consistent dark-blue accent for every centre marker — it flags
             # a statistic, not a category, and contrasts with all ridge fills.
-            ax.vlines(cval, i, top, color=PALETTE[4], alpha=0.95, linewidth=1.8,
+            ax.vlines(cval, i, top, color="#004488", alpha=0.95, linewidth=1.8,
                       zorder=i + 0.5)
     ax.set_ylim(-0.2, len(order) - 1 + overlap + 0.3)
     ax.margins(x=0)

@@ -63,8 +63,8 @@ subplot. A legend is added automatically only when there is more than one series
 | `set_theme()` | Apply the modern default style globally | — |
 | `scatter(data, x, y, color=None, trend=False, ...)` | Scatter, optionally split by a category; `trend=True` adds a per-group line of best fit | DataFrame |
 | `hist(data, column=None, by=None, bins=20, ...)` | Distribution of a column; `by=` overlays one translucent histogram per group | DataFrame / Series |
-| `lollipop(data, sort=True, ...)` | Ranked lollipop for categories | DataFrame / Series |
-| `dumbbell(data, sort=True, ...)` | Two dots + connector per row (A vs B) | 2-column DataFrame |
+| `lollipop(data, colors=None, sort=True, ...)` | Ranked lollipop; `colors` (a colour or `{label: colour}`) tints the dots | DataFrame / Series |
+| `dumbbell(data, colors=None, sort=True, ...)` | Two dots + connector per row (A vs B); `colors` sets the pair | 2-column DataFrame |
 | `ridgeline(data, value, group, center="median", band=None, overlap=1.3, ...)` | Overlapping distribution per group; `center` marks the mean/median, `band` shades ±1 SD or the IQR | DataFrame |
 
 Common keyword args: `title`, `xlabel`, `ylabel`, `ax`.
@@ -85,10 +85,11 @@ Tol's colorblind-safe *muted* hues as fallbacks for higher series counts.
 
 ## Example
 
-The gallery above is built entirely from the **Palmer Penguins** dataset
-(`examples/penguins.csv`) — a body-mass ridgeline, a species-count lollipop, a
-female-vs-male dumbbell, a bill-length-vs-depth scatter, and a flipper-length
-histogram. Run it end to end:
+The gallery above is a small poster built entirely from the **Palmer Penguins**
+dataset (`examples/penguins.csv`) — a body-mass ridgeline, a species-count
+lollipop, a female-vs-male dumbbell, a bill-length-vs-depth scatter, a
+flipper-length histogram, and a penguin trio (`examples/*.png`) that doubles as
+the species key. Run it end to end:
 
 ```bash
 python examples/example.py   # writes examples/gallery.png
